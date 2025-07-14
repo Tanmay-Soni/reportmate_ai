@@ -38,11 +38,9 @@ function App() {
     setSavedChats(prev => prev.map(chat => {
       if (chat.id === currentChatId) {
         let updatedChat = { ...chat, messages: [...chat.messages, newMessage] };
-
         if (chat.title === 'New Chat') {
           updatedChat.title = generateChatTitle(userInput);
         }
-
         return updatedChat;
       }
       return chat;
@@ -106,6 +104,11 @@ function App() {
     }
   };
 
+  const handleClearAllChats = () => {
+    setSavedChats([]);
+    setCurrentChatId(null);
+  };
+
   const currentChat = getCurrentChat();
   const userHasStarted = currentChat?.messages.some(msg => msg.role === 'user');
 
@@ -119,6 +122,7 @@ function App() {
         onNewChat={handleNewChat}
         currentChatId={currentChatId}
         onDeleteChat={handleDeleteChat}
+        onClearAllChats={handleClearAllChats} 
       />
 
       <div className="flex flex-col flex-1 transition-all duration-300 bg-gray-100">
@@ -131,20 +135,16 @@ function App() {
               />
             ) : (
               <div className="relative h-full flex flex-col items-center justify-start">
-                {/* Supportive Message */}
                 <div className="mt-20 text-center max-w-md px-4">
                   <p className="text-xl font-medium text-gray-500 leading-relaxed">
                     I'm here for your help,<br />
                     don't hesitate and ask please.
                   </p>
                 </div>
-
-                {/* Input Bar + Suggested Prompts */}
                 <div className="absolute top-1/2 transform -translate-y-1/2 left-0 w-full flex flex-col items-center">
                   <div className="w-full max-w-3xl px-4">
                     <InputBar onSend={handleSendMessage} isCentered={true} />
                   </div>
-
                   <div className="mt-4 flex flex-wrap justify-center max-w-3xl px-4">
                     {[
                       "Analyze a transcript for fraud risk",
