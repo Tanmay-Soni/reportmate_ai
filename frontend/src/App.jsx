@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import ChatUI from './components/ChatUI';
 import InputBar from './components/InputBar';
 import Sidebar from './components/Sidebar';
+import FileDropOverlay from './components/FileDropOverlay';
+import FilePreview from './components/FilePreview'; 
 
 function App() {
   const [savedChats, setSavedChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
   const getCurrentChat = () => savedChats.find(chat => chat.id === currentChatId);
 
@@ -24,6 +27,38 @@ function App() {
       setCurrentChatId(newChat.id);
     }
   }, []);
+
+  useEffect(() => {
+    const preventDefaults = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+
+    const handleDrop = (e) => {
+      preventDefaults(e);
+      // Handle file drop here if needed
+    };
+
+    document.addEventListener('dragover', preventDefaults, true);
+    document.addEventListener('drop', handleDrop, true);
+
+    return () => {
+      document.removeEventListener('dragover', preventDefaults, true);
+      document.removeEventListener('drop', handleDrop, true);
+    };
+  }, []);
+
+  // Add this function to handle file drops
+  const handleFileDrop = async (file) => {
+    console.log('App received file:', file.name);
+    setUploadedFiles(prev => {
+      const newFiles = [...prev, file];
+      console.log('Updated uploadedFiles:', newFiles); // Add this log
+      return newFiles;
+    });
+    // You can add file upload logic here if needed
+  };
 
   const generateChatTitle = (message) => {
     return message.split(' ').slice(0, 3).join(' ') + '...';
@@ -114,6 +149,9 @@ function App() {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      {/* Add FileDropOverlay at the top level */}
+      <FileDropOverlay onFileUploaded={handleFileDrop} />
+      
       <Sidebar
         savedChats={savedChats}
         onSelectChat={handleSelectChat}
@@ -132,6 +170,8 @@ function App() {
               <ChatUI
                 messages={currentChat?.messages || []}
                 isLoading={isLoading}
+                uploadedFiles={uploadedFiles}
+                onRemoveFile={(index) => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
               />
             ) : (
               <div className="relative h-full flex flex-col items-center justify-start">
@@ -141,9 +181,15 @@ function App() {
                     don't hesitate and ask please.
                   </p>
                 </div>
+                
                 <div className="absolute top-1/2 transform -translate-y-1/2 left-0 w-full flex flex-col items-center">
                   <div className="w-full max-w-3xl px-4">
-                    <InputBar onSend={handleSendMessage} isCentered={true} />
+                    <InputBar 
+                      onSend={handleSendMessage} 
+                      isCentered={true} 
+                      uploadedFiles={uploadedFiles}
+                      onRemoveFile={(index) => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
+                    />
                   </div>
                   <div className="mt-4 flex flex-wrap justify-center max-w-3xl px-4">
                     {[
@@ -173,7 +219,12 @@ function App() {
 
         {userHasStarted && (
           <div className="bg-gray-100">
-            <InputBar onSend={handleSendMessage} isCentered={false} />
+            <InputBar 
+              onSend={handleSendMessage} 
+              isCentered={false} 
+              uploadedFiles={uploadedFiles}
+              onRemoveFile={(index) => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
+            />
           </div>
         )}
       </div>

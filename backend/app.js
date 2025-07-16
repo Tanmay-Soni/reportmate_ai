@@ -6,6 +6,7 @@ require('dotenv').config();
 
 // Import Routes
 const chatRoutes = require('./routes/chatRoutes');
+const fileRoutes = require('./routes/fileRoutes');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/chat', chatRoutes);
+app.use('/api/files', fileRoutes);
 
 // Server Listener
 const PORT = process.env.PORT || 5000;
