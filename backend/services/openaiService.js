@@ -3,7 +3,7 @@ const FormData = require('form-data');
 const fs = require('fs');
 
 const apiKey = process.env.OPENAI_API_KEY;
-const assistantId = process.env.OPENAI_ASSISTANT_ID; // Set this in your .env
+const assistantId = process.env.OPENAI_ASSISTANT_ID;
 const openaiBase = 'https://api.openai.com/v1';
 
 // --- Assistants API ---
@@ -168,6 +168,3 @@ exports.waitForFileProcessed = async (fileId, timeoutMs = 20000) => {
   }
   throw new Error('File processing timed out');
 };
-
-// --- Remove old completions/chat function ---
-// exports.getOpenAIResponse = async (message) => { ... } // (remove or comment out)
