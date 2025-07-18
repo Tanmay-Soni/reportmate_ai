@@ -62,12 +62,6 @@ npm install
 
 ### 4. Environment Setup
 
-#### Frontend Environment
-Create a `.env` file in the `frontend` directory (if needed for any frontend-specific variables):
-```bash
-# Frontend environment variables (if any)
-```
-
 #### Backend Environment
 Create a `.env` file in the `backend` directory:
 ```bash
