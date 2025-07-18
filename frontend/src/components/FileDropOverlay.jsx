@@ -26,7 +26,7 @@ export default function FileDropOverlay({ onFileUploaded }) {
       // Only set dragging to false if we're leaving the window entirely
       if (e.clientX <= 0 || e.clientY <= 0 || 
           e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
-        setIsDragging(false);
+      setIsDragging(false);
       }
     };
 

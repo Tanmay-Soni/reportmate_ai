@@ -1,10 +1,8 @@
-// routes/fileRoutes.js
 const express = require('express');
 const router = express.Router();
-const upload = require('../middlewares/uploadMiddleware');
-const fileController = require('../controllers/fileController');
+const uploadMiddleware = require('../middlewares/uploadMiddleware');
+const { handleFileUpload } = require('../controllers/fileController');
 
-// POST /api/files/upload
-router.post('/upload', upload.single('file'), fileController.handleFileUpload);
+router.post('/upload', uploadMiddleware, handleFileUpload);
 
 module.exports = router;

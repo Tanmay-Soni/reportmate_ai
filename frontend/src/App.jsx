@@ -4,6 +4,7 @@ import InputBar from './components/InputBar';
 import Sidebar from './components/Sidebar';
 import FileDropOverlay from './components/FileDropOverlay';
 import FilePreview from './components/FilePreview'; 
+import { uploadFile } from './services/openaiFileService';
 
 function App() {
   const [savedChats, setSavedChats] = useState([]);
@@ -67,12 +68,26 @@ function App() {
   const handleSendMessage = async (userInput) => {
     if (!currentChatId) return;
 
-    const newMessage = { role: 'user', content: userInput };
     setIsLoading(true);
 
+    // 1. Add the user message immediately
     setSavedChats(prev => prev.map(chat => {
       if (chat.id === currentChatId) {
-        let updatedChat = { ...chat, messages: [...chat.messages, newMessage] };
+        let updatedChat = { 
+          ...chat, 
+          messages: [
+            ...chat.messages, 
+            { 
+              role: 'user', 
+              content: userInput, 
+              files: uploadedFiles.map(file => ({
+                name: file.name,
+                type: file.type,
+                // Optionally add more info here
+              }))
+            }
+          ] 
+        };
         if (chat.title === 'New Chat') {
           updatedChat.title = generateChatTitle(userInput);
         }
@@ -81,16 +96,55 @@ function App() {
       return chat;
     }));
 
+    // Clear files immediately after adding the message
+    setUploadedFiles([]);
+
+    // 2. Upload all files
+    let uploadedFileInfos = [];
+    if (uploadedFiles.length > 0) {
+      try {
+        uploadedFileInfos = await Promise.all(
+          uploadedFiles.map(file => uploadFile(file))
+        );
+        // Remove this line: setUploadedFiles([]);
+      } catch (err) {
+        alert('One or more files failed to upload.');
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // 3. Send message to backend, include file info
+    const openAIFiles = uploadedFileInfos.map(info => info.openAIFileInfo.id);
+
     try {
       const res = await fetch('http://localhost:5000/api/chat/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userInput }),
+        body: JSON.stringify({
+          message: userInput,
+          fileIds: openAIFiles,
+        }),
       });
 
       const data = await res.json();
-      const finalAIMessage = { role: 'ai', content: data.response || 'No response from AI.' };
-
+      console.log("Server raw response:", data);
+      if (!data.response) {
+        console.error("Empty AI response from server:", data);
+      }
+      let aiContent;
+      if (data.error) {
+        aiContent = `Error: ${data.error}`;
+      } else if (data.response) {
+        aiContent = data.response;
+      } else {
+        aiContent = 'No response from AI.';
+      }
+      const finalAIMessage = { 
+        role: 'ai', 
+        content: aiContent
+      };      
+      
       setSavedChats(prev => prev.map(chat => {
         if (chat.id === currentChatId) {
           return {
@@ -100,7 +154,6 @@ function App() {
         }
         return chat;
       }));
-
     } catch (error) {
       setSavedChats(prev => prev.map(chat => {
         if (chat.id === currentChatId) {
@@ -150,7 +203,7 @@ function App() {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Add FileDropOverlay at the top level */}
-      <FileDropOverlay onFileUploaded={handleFileDrop} />
+      <FileDropOverlay onFileUploaded={(file) => setUploadedFiles(prev => [...prev, file])} />
       
       <Sidebar
         savedChats={savedChats}
@@ -218,7 +271,7 @@ function App() {
         </div>
 
         {userHasStarted && (
-          <div className="bg-gray-100">
+          <div className="bg-gray-100 flex justify-center">
             <InputBar 
               onSend={handleSendMessage} 
               isCentered={false} 
