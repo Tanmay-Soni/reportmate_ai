@@ -111,8 +111,7 @@ reportmate_ai/
 │   │   │   ├── FileDropOverlay.jsx       # Drag-and-drop overlay
 │   │   │   └── FilePreview.jsx           # File attachment preview
 │   │   ├── services/
-│   │   │   ├── openaiFileService.js      # File upload service
-│   │   │   └── openaiTextService.js      # Text processing service
+│   │   │   ├── openaiFileService.js      # File and Text upload service
 │   │   ├── App.jsx                       # Main application component
 │   │   └── main.jsx                      # Application entry point
 │   ├── package.json
