@@ -8,7 +8,7 @@ export default function Sidebar({
   onNewChat,
   currentChatId,
   onDeleteChat,
-  onClearAllChats,     // <-- New prop
+  onClearAllChats,    
 }) {
   const [hovering, setHovering] = useState(false);
 
