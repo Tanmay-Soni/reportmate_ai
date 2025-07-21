@@ -1,6 +1,6 @@
 # ReportMate AI
 
-A GPT-like chat interface with drag-and-drop file upload functionality, designed to integrate file content contextually with user queries using OpenAI's Assistants API.
+An AI chat interface with drag-and-drop file upload functionality, designed to integrate file content contextually with user queries using OpenAI's Files and Assistants API.
 
 ## Features
 
